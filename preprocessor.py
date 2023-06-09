@@ -61,3 +61,5 @@ stopwords = load_stopwords(stopword_file) # load stopwords
 
 # get the articles and their topics
 articles = extract_text(data, stopwords) # get articles and their topics
+
+print(articles[0])

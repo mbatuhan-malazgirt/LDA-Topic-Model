@@ -1,5 +1,8 @@
 import random
 import numpy as np
+import sys
+from preprocessor import Preprocessor
+
 
 class LDAModel:
     def __init__(self, num_topics, docs, alpha=0.1, beta=0.1):
@@ -36,7 +39,7 @@ class LDAModel:
                 self.n_zt[z, self.word2id[word]] -= 1
                 self.n_z[z] -= 1
 
-                p_z = (self.n_zt[:, self.word2id[word]] / self.n_z) * (self.n_mz[m, :] / len(doc))
+                p_z = (self.n_zt[:, self.word2id[word]] / self.n_z) * (self.n_mz[m, :] / max(len(doc), 1e-10))
                 z = np.random.multinomial(1, p_z / p_z.sum()).argmax()
 
                 self.z_mn[m][n] = z
@@ -49,15 +52,33 @@ class LDAModel:
         topn_ids = np.argsort(topic)[:-topn-1:-1]
         return [(id, topic[id]) for id in topn_ids]
 
+"""
 docs = [
     ['apple', 'banana', 'apple', 'apple', 'banana', 'strawberry', 'strawberry', 'strawberry'],
     ['dog', 'dog', 'cat', 'dog', 'cat', 'cat', 'dog', 'cat'],
     ['car', 'bike', 'car', 'bike', 'car', 'car', 'bike', 'bike'],
     # Add more documents here
-]
+]"""
 
-lda = LDAModel(2, docs)
+#We will call preprocesser.py here to get the articles
 
+stopword_file = 'stopwords.txt'  # stopwords file
+directory = 'reuters21578/'  # directory containing the data files
+
+preprocessor = Preprocessor(stopword_file)
+articles = preprocessor.preprocess(directory)
+
+docs = []
+print('Preprocessing...')
+for article in articles:
+    # Check if the document is not empty
+    if article[0]:
+        docs.append(article[0])
+
+
+lda = LDAModel(4, docs)
+
+print('Training LDA...')
 for i in range(100):  # number of iterations
     lda.inference()
 

@@ -13,6 +13,8 @@ preprocessor.preprocessDocuments()
 preprocessor.bagofwords()
 preprocessor.tfidf()
 
+'''
+
 # lda_model = gensim.models.LdaMulticore(preprocessor.bow_corpus, num_topics=10, id2word=preprocessor.dictionary, passes=2, workers=2)
 lda_model = gensim.models.LdaModel(preprocessor.bow_corpus, num_topics=10, id2word=preprocessor.dictionary, passes=2)
 for idx, topic in lda_model.print_topics(-1):
@@ -87,18 +89,7 @@ docs = [
 
 #We will call preprocesser.py here to get the articles
 
-stopword_file = 'stopwords.txt'  # stopwords file
-directory = 'reuters21578/'  # directory containing the data files
-
-preprocessor = Preprocessor(stopword_file)
-articles = preprocessor.preprocess(directory)
-
-docs = []
-print('Preprocessing...')
-for article in articles:
-    # Check if the document is not empty
-    if article[0]:
-        docs.append(article[0])
+docs = preprocessor.bow_corpus
 
 
 lda = LDAModel(4, docs)
@@ -113,4 +104,3 @@ for i in range(lda.num_topics):
     terms = lda.get_topic_terms(i)
     for term, probability in terms:
         print(f'{lda.vocab[term]}: {probability}')
-'''

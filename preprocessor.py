@@ -1,6 +1,74 @@
-import re
-import html
+import pandas as pd
+import numpy as np
+import gensim
+from gensim.utils import simple_preprocess
+from gensim.parsing.preprocessing import STOPWORDS
+from gensim import corpora, models
+from nltk.stem import WordNetLemmatizer, SnowballStemmer
+from nltk.stem.porter import *
 
+import nltk
+nltk.download('wordnet')
+
+class Preprocessor:
+
+    def __init__(self, directory):
+        self.directory = directory
+
+    def readDocuments(self):
+        data = pd.read_csv(self.directory, error_bad_lines=False);
+        data_text = data[['headline_text']]
+        data_text['index'] = data_text.index
+        self.documents = data_text
+
+    def lemmatize_stemming(self, text):
+        stemmer = nltk.stem.PorterStemmer()
+        return stemmer.stem(WordNetLemmatizer().lemmatize(text, pos='v'))
+    
+    def preprocess(self, text):
+        result = []
+        for token in gensim.utils.simple_preprocess(text):
+            if token not in gensim.parsing.preprocessing.STOPWORDS and len(token) > 3:
+                result.append(self.lemmatize_stemming(token))
+        return result
+    
+    def preprocessDocuments(self):
+        self.processed_docs = self.documents['headline_text'].map(self.preprocess)
+
+    def bagofwords(self):
+        self.dictionary = gensim.corpora.Dictionary(self.processed_docs)
+        self.dictionary.filter_extremes(no_below=15, no_above=0.5, keep_n=100000)
+        self.bow_corpus = [self.dictionary.doc2bow(doc) for doc in self.processed_docs]
+
+    def tfidf(self):
+        tfidf = models.TfidfModel(self.bow_corpus)
+        self.corpus_tfidf = tfidf[self.bow_corpus]
+        
+'''
+preprocessor = Preprocessor('abcnews-date-text.csv')
+preprocessor.readDocuments()
+preprocessor.preprocessDocuments()
+preprocessor.bagofwords()
+preprocessor.tfidf()
+
+from pprint import pprint
+for doc in preprocessor.corpus_tfidf:
+    pprint(doc)
+    break
+'''
+
+'''
+doc_sample = preprocessor.documents[preprocessor.documents['index'] == 4310].values[0][0]
+print('original document: ')
+words = []
+for word in doc_sample.split(' '):
+    words.append(word)
+print(words)
+print('\n\n tokenized and lemmatized document: ')
+print(preprocessor.preprocess(doc_sample))
+'''
+
+'''
 class Preprocessor:
     def __init__(self, stopword_file):
         self.stopwords = self.load_stopwords(stopword_file)
@@ -64,4 +132,4 @@ directory = 'reuters21578/'  # directory containing the data files
 
 preprocessor = Preprocessor(stopword_file)
 articles = preprocessor.preprocess(directory)"""
-
+'''

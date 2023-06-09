@@ -1,9 +1,34 @@
-import random
+import pandas as pd
 import numpy as np
-import sys
+import gensim
+from gensim.utils import simple_preprocess
+from gensim.parsing.preprocessing import STOPWORDS
+from gensim import corpora, models
 from preprocessor import Preprocessor
 
 
+preprocessor = Preprocessor('abcnews-date-text.csv')
+preprocessor.readDocuments()
+preprocessor.preprocessDocuments()
+preprocessor.bagofwords()
+preprocessor.tfidf()
+
+# lda_model = gensim.models.LdaMulticore(preprocessor.bow_corpus, num_topics=10, id2word=preprocessor.dictionary, passes=2, workers=2)
+lda_model = gensim.models.LdaModel(preprocessor.bow_corpus, num_topics=10, id2word=preprocessor.dictionary, passes=2)
+for idx, topic in lda_model.print_topics(-1):
+    print('Topic: {} \nWords: {}'.format(idx, topic))
+
+for index, score in sorted(lda_model[preprocessor.bow_corpus[4310]], key=lambda tup: -1*tup[1]):
+    print("\nScore: {}\t \nTopic: {}".format(score, lda_model.print_topic(index, 10)))
+
+# lda_model_tfidf = gensim.models.LdaMulticore(preprocessor.corpus_tfidf, num_topics=10, id2word=preprocessor.dictionary, passes=2, workers=4)
+# for idx, topic in lda_model_tfidf.print_topics(-1):
+#     print('Topic: {} Word: {}'.format(idx, topic))
+
+# for index, score in sorted(lda_model_tfidf[preprocessor.bow_corpus[4310]], key=lambda tup: -1*tup[1]):
+#     print("\nScore: {}\t \nTopic: {}".format(score, lda_model_tfidf.print_topic(index, 10)))
+
+'''
 class LDAModel:
     def __init__(self, num_topics, docs, alpha=0.1, beta=0.1):
         self.alpha = alpha
@@ -88,3 +113,4 @@ for i in range(lda.num_topics):
     terms = lda.get_topic_terms(i)
     for term, probability in terms:
         print(f'{lda.vocab[term]}: {probability}')
+'''

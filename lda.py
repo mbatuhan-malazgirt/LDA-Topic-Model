@@ -13,23 +13,15 @@ preprocessor.preprocessDocuments()
 preprocessor.bagofwords()
 preprocessor.tfidf()
 
-'''
-lda_model = gensim.models.LdaModel(preprocessor.bow_corpus, num_topics=2, id2word=preprocessor.dictionary, passes=2)
+
+lda_model = gensim.models.LdaModel(preprocessor.bow_corpus, num_topics=1, id2word=preprocessor.dictionary, passes=2)
 for idx, topic in lda_model.print_topics(-1):
     print('Topic: {} \nWords: {}'.format(idx, topic))
-'''
+
 '''
 for index, score in sorted(lda_model[preprocessor.bow_corpus[4310]], key=lambda tup: -1*tup[1]):
     print("\nScore: {}\t \nTopic: {}".format(score, lda_model.print_topic(index, 10)))
 '''
-
-# lda_model_tfidf = gensim.models.LdaMulticore(preprocessor.corpus_tfidf, num_topics=10, id2word=preprocessor.dictionary, passes=2, workers=4)
-# for idx, topic in lda_model_tfidf.print_topics(-1):
-#     print('Topic: {} Word: {}'.format(idx, topic))
-
-# for index, score in sorted(lda_model_tfidf[preprocessor.bow_corpus[4310]], key=lambda tup: -1*tup[1]):
-#     print("\nScore: {}\t \nTopic: {}".format(score, lda_model_tfidf.print_topic(index, 10)))
-
 
 class LDAModel:
     def __init__(self, num_topics, dictionary, corpus, alpha=0.1, beta=0.1):
@@ -80,7 +72,7 @@ class LDAModel:
 
 docs = preprocessor.bow_corpus
 
-lda = LDAModel(2, preprocessor.dictionary, preprocessor.bow_corpus)
+lda = LDAModel(1, preprocessor.dictionary, preprocessor.bow_corpus)
 
 print('Training LDA...')
 for i in range(100):  # number of iterations

@@ -63,7 +63,22 @@ class LDAModel:
 
         # Print out results
         for i in range(self.num_topics):
-            print(f'Topic {i}:')
             terms = self.get_topic_terms(i)
-            for term, probability in terms:
-                print(f'{term}: {probability}')
+            topic = ' '.join([term for term, probability in terms])
+            print(f'Topic {i}: {topic}')
+
+            #print terms in one line
+            # print(' '.join([term for term, probability in terms]))
+            # for term, probability in terms:
+            #     print(f'{term}: {probability}')
+
+    def get_perplexity(self):
+            # This model's implementation doesn't provide a built-in method to calculate perplexity
+        # Here is a generic way to calculate perplexity, assuming `self.model` is the trained model and `self.corpus` is the test corpus
+        total_log_likelihood = 0
+        total_num_words = 0
+        for document in self.corpus:
+            for id, freq in document:
+                total_log_likelihood += np.log(self.n_zt[:, id] / self.n_z) * freq
+                total_num_words += freq
+        return np.exp(-total_log_likelihood / total_num_words)

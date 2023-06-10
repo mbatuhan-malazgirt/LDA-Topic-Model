@@ -26,6 +26,8 @@ class hLDA:
                           eta=0.1, # the higher => topics become more diverse
                           seed=0)
         
+        self.model = hlda_model
+        
         docs = self.bow_corpus
 
         docs_as_tokens = []
@@ -41,7 +43,14 @@ class hLDA:
 
         for i in range(2):
             hlda_model.train(1)
-            print('Iteration: {}\tLog-likelihood: {}'.format(i, hlda_model.ll_per_word))
 
         for k in range(hlda_model.k):
             print('Level: {} \tTopic: {}'.format(hlda_model.level(k), hlda_model.get_topic_words(k, top_n=5)))
+
+    def get_perplexity(self):
+        return self.model.perplexity
+
+    def get_topic_diversity(self):
+        topic_word_matrix = np.array([self.model.get_topic_word_dist(i) for i in range(self.model.k)])
+        diversity_score = np.mean(np.apply_along_axis(lambda x: len(np.unique(x)), axis=1, arr=topic_word_matrix))
+        return diversity_score

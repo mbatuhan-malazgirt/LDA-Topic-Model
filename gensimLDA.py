@@ -8,13 +8,14 @@ from preprocessor import Preprocessor
 import tomotopy as tp
 
 
-preprocessor = Preprocessor('abcnews-date-text.csv')
-preprocessor.readDocuments()
-preprocessor.preprocessDocuments()
-preprocessor.bagofwords()
-preprocessor.tfidf()
+class gensimLDA:
+    def __init__(self, corpus, num_topics, id2word, passes):
+        self.corpus = corpus
+        self.num_topics = num_topics
+        self.id2word = id2word
+        self.passes = passes
+        self.model = gensim.models.LdaModel(self.corpus, num_topics = self.num_topics, id2word = self.id2word, passes = self.passes)
 
-
-lda_model = gensim.models.LdaModel(preprocessor.bow_corpus, num_topics=1, id2word=preprocessor.dictionary, passes=2)
-for idx, topic in lda_model.print_topics(-1):
-    print('Topic: {} \nWords: {}'.format(idx, topic))
+    def results(self):
+        for idx, topic in self.model.print_topics(-1):
+            print('Topic: {} \nWords: {}'.format(idx, topic))

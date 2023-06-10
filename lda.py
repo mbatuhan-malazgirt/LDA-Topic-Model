@@ -52,26 +52,18 @@ class LDAModel:
         topic = self.n_zt[topic, :] / self.n_zt[topic, :].sum()
         topn_ids = np.argsort(topic)[:-topn-1:-1]
         return [(self.dictionary[id], topic[id]) for id in topn_ids]
+    
+    def results(self):
 
+        # lda = LDAModel(1, self.dictionary, self.bow_corpus)
 
+        print('Training LDA...')
+        for i in range(2):  # number of iterations
+            self.inference()
 
-preprocessor = Preprocessor('abcnews-date-text.csv')
-preprocessor.readDocuments()
-preprocessor.preprocessDocuments()
-preprocessor.bagofwords()
-preprocessor.tfidf()
-
-docs = preprocessor.bow_corpus
-
-lda = LDAModel(1, preprocessor.dictionary, preprocessor.bow_corpus)
-
-print('Training LDA...')
-for i in range(2):  # number of iterations
-    lda.inference()
-
-# Print out results
-for i in range(lda.num_topics):
-    print(f'Topic {i}:')
-    terms = lda.get_topic_terms(i)
-    for term, probability in terms:
-        print(f'{term}: {probability}')
+        # Print out results
+        for i in range(self.num_topics):
+            print(f'Topic {i}:')
+            terms = self.get_topic_terms(i)
+            for term, probability in terms:
+                print(f'{term}: {probability}')

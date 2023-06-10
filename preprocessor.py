@@ -16,7 +16,7 @@ class Preprocessor:
         self.directory = directory
 
     def readDocuments(self):
-        data = pd.read_csv(self.directory, error_bad_lines=False, nrows=100);
+        data = pd.read_csv(self.directory, error_bad_lines=False, nrows=1000);
         data_text = data[['headline_text']]
         data_text['index'] = data_text.index
         self.documents = data_text

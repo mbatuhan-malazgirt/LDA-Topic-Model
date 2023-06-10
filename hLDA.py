@@ -7,13 +7,6 @@ from gensim import corpora, models
 from preprocessor import Preprocessor
 import tomotopy as tp
 
-preprocessor = Preprocessor('abcnews-date-text.csv')
-preprocessor.readDocuments()
-preprocessor.preprocessDocuments()
-preprocessor.bagofwords()
-preprocessor.tfidf()
-
-
 class hLDA:
     def __init__(self, bow_corpus, dictionary):
         self.bow_corpus = bow_corpus
@@ -35,17 +28,16 @@ class hLDA:
         for doc in docs:
             doc_as_tokens = []
             for id, freq in doc:
-                doc_as_tokens.extend([preprocessor.dictionary[id]] * freq)
+                doc_as_tokens.extend([self.dictionary[id]] * freq)
             docs_as_tokens.append(doc_as_tokens)
 
         for doc_as_tokens in docs_as_tokens:
             hlda_model.add_doc(doc_as_tokens)
 
-        for i in range(2):
-            hlda_model.train(1)
+        for i in range(1):
+            hlda_model.train(10)
 
-        for k in range(hlda_model.k):
-            print('Level: {} \tTopic: {}'.format(hlda_model.level(k), hlda_model.get_topic_words(k, top_n=5)))
+        self.print_topics( topn=10)
 
     def get_perplexity(self):
         return self.model.perplexity
@@ -54,3 +46,19 @@ class hLDA:
         topic_word_matrix = np.array([self.model.get_topic_word_dist(i) for i in range(self.model.k)])
         diversity_score = np.mean(np.apply_along_axis(lambda x: len(np.unique(x)), axis=1, arr=topic_word_matrix))
         return diversity_score
+    
+    def get_top_words(self, topic_id, topn=10):
+        """This function returns the top words for a given topic."""
+        topic_word_dist = self.model.get_topic_word_dist(topic_id)
+        top_word_indices = np.argsort(topic_word_dist)[::-1][:topn]
+        return [self.dictionary[idx] for idx in top_word_indices]
+    
+    def get_coherence(self, topn=10):
+        """This function calculates and returns the coherence."""
+        topics = [self.get_top_words(topic_id=i, topn=topn) for i in range(self.model.k)]
+        cm = gensim.models.CoherenceModel(topics=topics, corpus=self.bow_corpus, dictionary=self.dictionary, coherence='u_mass')
+        return cm.get_coherence()
+    
+    def print_topics(self, topn=10):
+        for i in range(self.model.k):
+            print('Topic', i, ':', self.get_top_words(i, topn=topn))

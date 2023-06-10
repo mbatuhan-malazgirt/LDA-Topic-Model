@@ -10,12 +10,14 @@ import tomotopy as tp
 
 class correlatedLDA:
     def __init__(self, dictionary, bow_corpus):
-        # prepare data for tomotopy
         self.train_corpus = [[dictionary[id] for id, freq in doc] for doc in bow_corpus]
+        self.dictionary = dictionary
+        self.bow_corpus = bow_corpus
 
-    def results(self):
+
+    def results(self, number_of_topics=1):
         # create an instance of the CTM model
-        self.model = tp.CTModel(k=1, min_cf=5)  # k is the number of topics
+        self.model = tp.CTModel(k=number_of_topics, min_cf=5)  # k is the number of topics
 
         # add the documents to the model
         for doc in self.train_corpus:
@@ -27,7 +29,12 @@ class correlatedLDA:
         # print out the topics
         for i in range(self.model.k):
             res = self.model.get_topic_words(i, top_n=10)
-            print('Topic', i, ':', [(word, prob) for word, prob in res])
+            topics = [word for word, _ in res]
+            str = ''
+            for word in topics:
+                str = str + word + ' '
+
+            print('Topic', i, ':', str)
 
     def get_perplexity(self):
         return self.model.perplexity    
@@ -37,3 +44,12 @@ class correlatedLDA:
         topic_word_matrix = np.array([self.model.get_topic_word_dist(i) for i in range(self.model.k)])
         diversity_score = np.mean(np.apply_along_axis(lambda x: len(np.unique(x)), axis=1, arr=topic_word_matrix))
         return diversity_score
+    
+    def get_top_words(self, topic_id, topn=10):
+        topic = self.model.get_topic_words(topic_id=topic_id, top_n=topn)
+        return [word for word, _ in topic]
+    
+    def get_coherence(self, topn=10):
+        topics = [self.get_top_words(topic_id=i, topn=topn) for i in range(self.model.k)]
+        cm = gensim.models.CoherenceModel(topics=topics, corpus=self.bow_corpus, dictionary=self.dictionary, coherence='u_mass')
+        return cm.get_coherence()    

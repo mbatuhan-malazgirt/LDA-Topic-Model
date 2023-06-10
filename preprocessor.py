@@ -16,7 +16,7 @@ class Preprocessor:
         self.directory = directory
 
     def readDocuments(self):
-        data = pd.read_csv(self.directory, error_bad_lines=False, nrows=10000);
+        data = pd.read_csv(self.directory, error_bad_lines=False, nrows=1000);
         data_text = data[['headline_text']]
         data_text['index'] = data_text.index
         self.documents = data_text
@@ -43,3 +43,9 @@ class Preprocessor:
     def tfidf(self):
         tfidf = models.TfidfModel(self.bow_corpus)
         self.corpus_tfidf = tfidf[self.bow_corpus]
+
+    def preprocessAndSave(self):
+        processed_data = pd.read_csv(self.directory, error_bad_lines=False);
+        # processed_data = pd.read_csv(self.directory, error_bad_lines=False, nrows=100);
+        processed_data['headline_text'] = processed_data['headline_text'].map(self.preprocess)
+        processed_data.to_csv('processed-abcnews.csv', index=False)

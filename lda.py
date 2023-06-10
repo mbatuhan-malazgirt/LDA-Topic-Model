@@ -5,23 +5,7 @@ from gensim.utils import simple_preprocess
 from gensim.parsing.preprocessing import STOPWORDS
 from gensim import corpora, models
 from preprocessor import Preprocessor
-
-
-preprocessor = Preprocessor('abcnews-date-text.csv')
-preprocessor.readDocuments()
-preprocessor.preprocessDocuments()
-preprocessor.bagofwords()
-preprocessor.tfidf()
-
-
-lda_model = gensim.models.LdaModel(preprocessor.bow_corpus, num_topics=1, id2word=preprocessor.dictionary, passes=2)
-for idx, topic in lda_model.print_topics(-1):
-    print('Topic: {} \nWords: {}'.format(idx, topic))
-
-'''
-for index, score in sorted(lda_model[preprocessor.bow_corpus[4310]], key=lambda tup: -1*tup[1]):
-    print("\nScore: {}\t \nTopic: {}".format(score, lda_model.print_topic(index, 10)))
-'''
+import tomotopy as tp
 
 class LDAModel:
     def __init__(self, num_topics, dictionary, corpus, alpha=0.1, beta=0.1):
@@ -70,12 +54,19 @@ class LDAModel:
         return [(self.dictionary[id], topic[id]) for id in topn_ids]
 
 
+
+preprocessor = Preprocessor('abcnews-date-text.csv')
+preprocessor.readDocuments()
+preprocessor.preprocessDocuments()
+preprocessor.bagofwords()
+preprocessor.tfidf()
+
 docs = preprocessor.bow_corpus
 
 lda = LDAModel(1, preprocessor.dictionary, preprocessor.bow_corpus)
 
 print('Training LDA...')
-for i in range(100):  # number of iterations
+for i in range(2):  # number of iterations
     lda.inference()
 
 # Print out results
